@@ -1,5 +1,5 @@
 # BarrierTool
-## Stergios Katsanoulis
+## Stergios Katsanoulis (ETH Zürich)
 -----------------------------------------------------------------------------
 
 License:
