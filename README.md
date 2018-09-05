@@ -1,5 +1,7 @@
 # BarrierTool
 
+-----------------------------------------------------------------------------
+
 License:
 
 This software is made public for research use only. It may be modified and redistributed
