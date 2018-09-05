@@ -1,7 +1,11 @@
+# BarrierTool
+
 License:
 
 This software is made public for research use only. It may be modified and redistributed
 under the terms of the GNU General Public License.
+
+-----------------------------------------------------------------------------
 
 Algorithm:
 
@@ -9,6 +13,7 @@ This code implements theoretical results developed by the Haller Group at ETH Zu
 You may find details about the underlying algorithm as well as instructions on how to navigate through
 the Graphical User Interface(GUI) on the file MANUAL.pdf.
 
+-----------------------------------------------------------------------------
 
 Tested on Matlab R2017a.
 
@@ -21,7 +26,10 @@ Installation notes :
 NOTE: This code may be improved and is subject to several changes. Therefore, we suggest to visit this 
 page and check if the version you downloaded is up to date.  
 
+-----------------------------------------------------------------------------
 
 Maintained by Stergios Katsanoulis,
+
 katsanos at ethz dot ch
+
 September 5, 2018.
