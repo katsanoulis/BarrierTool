@@ -13,7 +13,7 @@ Algorithm:
 
 This code implements theoretical results developed by the Haller Group at ETH Zurich. 
 You may find details about the underlying algorithm as well as instructions on how to navigate through
-the Graphical User Interface(GUI) on the file MANUAL.pdf.
+the Graphical User Interface(GUI) on the file "MANUAL.pdf".
 
 -----------------------------------------------------------------------------
 
