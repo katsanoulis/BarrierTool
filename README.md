@@ -1,21 +1,31 @@
-# BarrierTool
-## Stergios Katsanoulis (ETH Zürich)
------------------------------------------------------------------------------
+# Automated extraction of barriers to diffusive transport in two-dimensional velocity fields
 
-License:
+### License
 
 This software is made public for research use only. It may be modified and redistributed
 under the terms of the GNU General Public License.
 
------------------------------------------------------------------------------
+### Algorithm
 
-Algorithm:
+BarrierTool implements theoretical results developed by the Haller Group at ETH Zurich.
+More specifically, the code presented here provides a fully automated identification of 
+conservative [1], diffusive [2] transport barriers and their instantaneous (Eulerian) 
+counterparts [3] in an objective (observer-independent) fashion.
+You may find more details about the underlying algorithm [4] as well as instructions on 
+how to navigate through the Graphical User Interface(GUI) in the file "MANUAL.pdf" 
+contained in the repository.
 
-This code implements theoretical results developed by the Haller Group at ETH Zurich. 
-You may find details about the underlying algorithm as well as instructions on how to navigate through
-the Graphical User Interface(GUI) on the file "MANUAL.pdf".
+### References
+[1] G. Haller & F.J. Beron-Vera, Coherent Lagrangian vortices: The black holes of turbulence. 
+J. Fluid Mech. 731 (2013) R4.
 
------------------------------------------------------------------------------
+[2] G. Haller, D. Karrasch & F. Kogelbauer, Material barriers to diffusive and stochastic transport. Proc. Natl. Acad. Sci. U.S.A. (2018).
+
+[3] M. Serra & G. Haller, Objective Eulerian coherent structures. Chaos26 (2016).
+
+[4] M. Serra & G. Haller, Efficient computation of null geodesics with applications to coherent vortex detection. Proc. Royal Soc. A 473 (2017).
+
+### Installation notes
 
 Tested on Matlab R2017a.
 
@@ -27,8 +37,6 @@ Installation notes :
 
 NOTE: This code may be improved and is subject to several changes. Therefore, we suggest to visit this 
 page and check if the version you downloaded is up to date.  
-
------------------------------------------------------------------------------
 
 Maintained by Stergios Katsanoulis,
 
