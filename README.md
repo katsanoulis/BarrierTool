@@ -1,11 +1,11 @@
 # Automated extraction of barriers to diffusive transport in two-dimensional velocity fields
 
-### License
+## License
 
 This software is made public for research use only. It may be modified and redistributed
 under the terms of the GNU General Public License.
 
-### Algorithm
+## Algorithm
 
 BarrierTool implements theoretical results developed by the Haller Group at ETH Zurich.
 More specifically, the code presented here provides a fully automated identification of 
@@ -15,7 +15,7 @@ You may find more details about the underlying algorithm [4] as well as instruct
 how to navigate through the Graphical User Interface(GUI) in the file "MANUAL.pdf" 
 contained in the repository.
 
-### References
+## References
 [1] G. Haller & F.J. Beron-Vera, Coherent Lagrangian vortices: The black holes of turbulence. 
 J. Fluid Mech. 731 (2013) R4.
 
@@ -25,7 +25,7 @@ J. Fluid Mech. 731 (2013) R4.
 
 [4] M. Serra & G. Haller, Efficient computation of null geodesics with applications to coherent vortex detection. Proc. Royal Soc. A 473 (2017).
 
-### Installation notes
+## Installation notes
 
 Tested on Matlab R2017a.
 
