@@ -1,4 +1,4 @@
-# Automated extraction of barriers to diffusive transport in two-dimensional velocity fields
+# Automated extraction of material barriers from two-dimensional velocity fields
 
 ## License
 
@@ -8,10 +8,7 @@ under the terms of the GNU General Public License.
 ## Algorithm
 
 BarrierTool implements theoretical results developed by the Haller Group at ETH Zurich.
-More specifically, the code presented here provides a fully automated identification of 
-conservative [1], diffusive [2] transport barriers and their instantaneous (Eulerian) 
-counterparts [3] in an objective (observer-independent) fashion.
-You may find more details about the underlying algorithm [4] as well as instructions on 
+More specifically, the code presented here provides a fully automated identification of black-hole eddies [1], diffusive transport barriers [2], diffusive vortex boundaries [3] and objective Eulerian Coherent Structures [4] in an objective (observer-independent) fashion. You may find more details about the underlying algorithm [4] as well as instructions on 
 how to navigate through the Graphical User Interface(GUI) in the file "MANUAL.pdf" 
 contained in the repository.
 
@@ -21,13 +18,16 @@ J. Fluid Mech. 731 (2013) R4.
 
 [2] G. Haller, D. Karrasch & F. Kogelbauer, Material barriers to diffusive and stochastic transport. Proc. Natl. Acad. Sci. U.S.A. (2018).
 
-[3] M. Serra & G. Haller, Objective Eulerian coherent structures. Chaos26 (2016).
+[3] S. Katsanoulis, M.Farazmand, M. Serra & G. Haller, Diffusive vortex boundaries as material barriers to vorticity
+transport in two-dimensional flows. Submitted.
 
-[4] M. Serra & G. Haller, Efficient computation of null geodesics with applications to coherent vortex detection. Proc. Royal Soc. A 473 (2017).
+[4] M. Serra & G. Haller, Objective Eulerian coherent structures. Chaos26 (2016).
+
+[5] M. Serra & G. Haller, Efficient computation of null geodesics with applications to coherent vortex detection. Proc. Royal Soc. A 473 (2017).
 
 ## Installation notes
 
-Tested on Matlab R2017a.
+Tested on Matlab R2019a.
 
 Installation notes :
 
@@ -42,4 +42,4 @@ Maintained by Stergios Katsanoulis,
 
 katsanos at ethz dot ch
 
-September 5, 2018.
+October 7, 2019.
