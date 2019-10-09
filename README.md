@@ -1,4 +1,4 @@
-# Automated extraction of material barriers from two-dimensional velocity fields
+# Automated extraction of material barriers in two-dimensional velocity fields
 
 ## License
 
