@@ -1,0 +1,168 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%              ____________________   ___           %%%%%%%%%%%%%
+%%%%%%%%%%%             /  ________   ___   /__/  /           %%%%%%%%%%%%%
+%%%%%%%%%%%            /  _____/  /  /  /  ___   /            %%%%%%%%%%%%%
+%%%%%%%%%%%           /_______/  /__/  /__/  /__/             %%%%%%%%%%%%%
+%%%%%%%%%%%    Swiss Federal Institute of Technology Zurich   %%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%  Author: Stergios Katsanoulis  %%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%  Email:  katsanos@ethz.ch      %%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%  Date:   07/10/2019            %%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function AdvectParticlesAndLCSs(x1LcOutM,x2LcOutM,DBS,xspan,yspan,methodInterp,tstep,tspan,m,n)
+
+% specify the number of LCSs to be advected
+nLCSs = size(x1LcOutM,2);
+
+options = odeset('RelTol',1e-6,'AbsTol',1e-6);
+
+x_span = linspace(xspan(1),xspan(end),m);
+y_span = linspace(yspan(1),yspan(end),n);
+
+[x0,y0] = ndgrid(x_span,y_span);
+trC_interp = griddedInterpolant({xspan,yspan},DBS','linear');
+trC = trC_interp(x0,y0);
+
+l = zeros(1,nLCSs+1);
+
+l(1) = length(x0(:));
+
+conc = x0(:);
+for ln = 1:nLCSs
+    conc = [conc; x1LcOutM{1,ln}(:)];
+    l(ln+1) = length(x1LcOutM{1,ln}(:));
+end
+conc = [conc;y0(:)];
+for ln = 1:nLCSs
+    conc = [conc; x2LcOutM{1,ln}(:)];
+end
+
+[~,Fout] = ode45(@ODEfun,tspan,conc,options,tstep,methodInterp);
+
+Fgrid = zeros(length(tspan),2*l(1));
+Fgrid(:,1:l(1)) = Fout(:,1:l(1));
+counter = l(1)+1;
+F = cell(1,nLCSs);
+for ln = 1:nLCSs
+    F{1,ln} = zeros(length(tspan),2*l(ln+1));
+    F{1,ln}(:,1:l(ln+1)) = Fout(:,counter:counter+l(ln+1)-1);
+    counter = counter + l(ln+1);
+end
+Fgrid(:,l(1)+1:end) = Fout(:,counter:counter+l(1)-1);
+counter = counter+l(1);
+for ln = 1:nLCSs
+    F{1,ln}(:,l(ln+1)+1:end) = Fout(:,counter:counter+l(ln+1)-1);
+    counter = counter + l(ln+1);
+end
+
+Fgrid1 = Fgrid(:,1:l(1));
+Fgrid2 = Fgrid(:,l(1)+1:end);
+max1 = max(Fgrid1(:));
+min1 = min(Fgrid1(:));
+max2 = max(Fgrid2(:));
+min2 = min(Fgrid2(:));
+
+h = figure();
+axis tight manual % this ensures that getframe() returns a consistent size
+filename = 'Vortices.gif';
+
+for i=1:length(Fgrid(:,1))
+    
+    % Colormap encoding different \lambda values
+    
+    % Plot properties
+    AxthicksFnt = 20;
+    fontsizeaxlab = 20;
+    
+    sz = 7;
+    
+    scatter(Fgrid(i,1:l(1)),Fgrid(i,l(1)+1:end),sz,log(trC(:)),'filled')
+    hold on
+    for ln=1:nLCSs
+        p(ln) = plot(F{1,ln}(i,1:l(ln+1)),F{1,ln}(i,l(ln+1)+1:end),'color','r','LineWidth',3);
+    end
+    
+    axis([min1 max1 min2 max2])
+    %axis([-8 6 -34 -28])
+    %axis([0 2*pi 0 2*pi])
+    set(gca,'FontSize',AxthicksFnt,'fontWeight','normal')
+    %hhF=colorbar(gca);
+    box on
+    set(gca,'color',[0.9 0.9 0.9])
+    set(gca,'YDir','normal')
+    set(gcf,'color','w');
+    set(gcf, 'Position', [0, 0, 900, 900])
+    xlabel('$$x$$','Interpreter','latex','FontWeight','bold','FontSize',fontsizeaxlab);
+    ylabel('$$y$$','Interpreter','latex','FontWeight','bold','FontSize',fontsizeaxlab);
+    set(gca, 'Ticklength', [0 0])
+    %caxis([-1 1])
+    
+    t = text(0.85,0.9,strcat(' T = ',{' '},num2str(tspan(i))),'Units','normalized');
+    t.FontSize = 16;
+    t.FontWeight = 'bold';
+    t.EdgeColor = 'black';
+    t.LineWidth = 1.5;
+    title('Material Advection of diffusive vortex boundaries','Interpreter','latex','FontWeight','normal','Fontsize', fontsizeaxlab)
+    set(gca,'TickLabelInterpreter', 'latex');
+    hold off
+    drawnow
+    % Capture the plot as an image
+    frame = getframe(h);
+    im = frame2im(frame);
+    [imind,cm] = rgb2ind(im,256);
+    % Write to the GIF File
+    if i == 1
+        imwrite(imind,cm,filename,'gif','DelayTime',0.1,'Loopcount',inf);
+    else
+        imwrite(imind,cm,filename,'gif','DelayTime',0.1,'WriteMode','append');
+    end
+end
+
+
+    function dy = ODEfun(t,y,tstep,methodInterp)
+        % load the grid over which the velocity is saved
+        xi = linspace(0,2*pi,1025);
+        yi = linspace(0,2*pi,1025);
+        
+        N=round(length(y)/2);
+        y(1:N,1)     = wrapTo2Pi(y(1:N,1));
+        y(N+1:2*N,1) = wrapTo2Pi(y(N+1:2*N,1));
+        
+        % Interpolate velocity in time and space
+        [u1_vec, u2_vec]= interp_vel(t,y,xi,yi);
+        dy = zeros(2*N,1);    % a column vector
+        dy(1:N,1) = u1_vec(1:N,1);
+        dy(N+1:2*N,1) = u2_vec(1:N,1);
+        
+        function [u_vec, v_vec]=interp_vel(t,y,xi,yi)
+            N=round(length(y)/2);
+            % load velocity data
+            k=floor(t/tstep);
+            [ui, vi]=read_vel(k);
+            [uf, vf]=read_vel(k+1);
+            
+            %linear interpolation in time
+            u_t = ((k+1)*tstep-t)/tstep*ui + (t-k*tstep)/tstep*uf;
+            v_t = ((k+1)*tstep-t)/tstep*vi + (t-k*tstep)/tstep*vf;
+            
+            %spline interpolation in space
+            u_interp = griddedInterpolant({xi,yi},u_t,methodInterp,'none');
+            v_interp = griddedInterpolant({xi,yi},v_t,methodInterp,'none');
+            u_vec = u_interp(y(1:N,1),y(N+1:2*N,1));
+            v_vec = v_interp(y(1:N,1),y(N+1:2*N,1));
+            
+            function [v1, v2]=read_vel(k)
+                str1 = '../../Data/turb_u_';
+                str2 = pad(int2str(k),4,'left','0');
+                str = strcat(str1,str2);
+                load(str);
+                [n1, n2]=size(u1);
+                v1=zeros(n1+1,n2+1); v2=zeros(n1+1,n2+1);
+                v1 = [u1 u1(:,1)]; v1=[v1; v1(1,:)]';
+                v2 = [u2 u2(:,1)]; v2=[v2; v2(1,:)]';
+            end
+        end
+    end
+end
+
+
