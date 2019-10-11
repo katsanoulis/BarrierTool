@@ -1,0 +1,61 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%              ____________________   ___           %%%%%%%%%%%%%
+%%%%%%%%%%%             /  ________   ___   /__/  /           %%%%%%%%%%%%%
+%%%%%%%%%%%            /  _____/  /  /  /  ___   /            %%%%%%%%%%%%%
+%%%%%%%%%%%           /_______/  /__/  /__/  /__/             %%%%%%%%%%%%%
+%%%%%%%%%%%    Swiss Federal Institute of Technology Zurich   %%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%  Author: Stergios Katsanoulis  %%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%  Email:  katsanos@ethz.ch      %%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%  Date:   07/10/2019            %%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Computation of CG tensor with better interpolation
+xspan = linspace(0,2*pi,1025);
+yspan = linspace(0,2*pi,1025);
+
+rhox = (xspan(2) - xspan(1))*0.1;
+rhoy = rhox;
+
+[xgrid,ygrid] = ndgrid(xspan,yspan);
+
+xPlusEpsilon_grid  = xgrid + rhox;
+xMinusEpsilon_grid = xgrid - rhox;
+yPlusEpsilon_grid  = ygrid + rhoy;
+yMinusEpsilon_grid = ygrid - rhoy;
+[xPe_grid,y0] = ndgrid(xPlusEpsilon_grid,ygrid);
+[xMe_grid,~]  = ndgrid(xMinusEpsilon_grid,ygrid);
+[x0,yPe_grid] = ndgrid(xgrid,yPlusEpsilon_grid);
+[~,yMe_grid]  = ndgrid(xgrid,yMinusEpsilon_grid);
+
+[m,n] = size(xgrid);
+
+tspan = [0:49 49.8];
+
+%% Advection of particles
+
+xt = zeros(m,n,5);
+yt = zeros(m,n,5);
+for k=1:4
+    xt(:,:,k) = xgrid + rhox*cos( (k-1)*pi/2 );
+    yt(:,:,k) = ygrid + rhoy*sin( (k-1)*pi/2 );
+end
+
+xt(:,:,5)=xgrid;
+yt(:,:,5)=ygrid;
+
+options = odeset('RelTol',1e-6,'AbsTol',1e-6);
+diffusion = 'true';
+NCores = 1;
+tic
+[xt,yt] = Integrator(xt(:,:,:),yt(:,:,:),tspan,NCores,options,diffusion);
+
+disp('Integration is over.')
+toc
+
+xt = reshape(xt, length(tspan), m, n, 5);
+yt = reshape(yt, length(tspan), m, n, 5);
+
+%% Cubic 3D interpolation for vorticity
+
+filename = 'omegaInterpolation3D.mat';
+save(filename,'o_interp','-v7.3')
