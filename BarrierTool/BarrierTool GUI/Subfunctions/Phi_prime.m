@@ -22,7 +22,7 @@
 % http://www.zfm.ethz.ch/~serra/
 %--------------------------------------------------------------------------
 
-function [C22mC11Gr,C12Gr,phiPrGr]=Phi_prime(C11,C11x1,C11x2,C12,C12x1,C12x2,C22,C22x1,C22x2,x1_g,x2_g,interpolationIn2D)
+function [C22mC11Gr,C11Gr,C12Gr,C22Gr,phiPrGr]=Phi_prime(C11,C11x1,C11x2,C12,C12x1,C12x2,C22,C22x1,C22x2,x1_g,x2_g,interpolationIn2D)
 
 if interpolationIn2D
     
@@ -71,7 +71,9 @@ end
 % existence V (cf. eq. (37) of [1]) of the reduced 3D null-geodesic flow (cf. eq. (38) of [1]).
 C22mC11Gr = griddedInterpolant ({x1_g,x2_g},permute(C22-C11,[2 1]),'linear');
 %C22mC11Gr = griddedInterpolant ({x1_g,x2_g},permute(C11,[2 1]),'linear');
+C11Gr = griddedInterpolant ({x1_g,x2_g},permute(C11,[2 1]),'linear');
 C12Gr = griddedInterpolant ({x1_g,x2_g},permute(C12,[2 1]),'linear');
+C22Gr = griddedInterpolant ({x1_g,x2_g},permute(C22,[2 1]),'linear');
 
 end
 

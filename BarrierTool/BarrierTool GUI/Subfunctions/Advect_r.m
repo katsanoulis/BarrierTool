@@ -20,7 +20,7 @@
 % Author: Mattia Serra  serram@ethz.ch
 % http://www.zfm.ethz.ch/~serra/
 %--------------------------------------------------------------------------
-function     [xt,yt,zt] = Advect_r(phiPrGr,C22mC11Gr,C12Gr,x1_glim,x2_glim,sVec,xx,yy,zz,interpolationIn2D) 
+function     [xt,yt,zt] = Advect_r(phiPrGr,C22mC11Gr,C12Gr,x1_glim,x2_glim,sVec,xx,yy,zz,interpolationIn2D,C11Gr,C22Gr,lam) 
     % Shared variables 
     x1m = x1_glim(1);
     x1M = x1_glim(2);
@@ -80,6 +80,12 @@ function [k1,k2,k3] = r_prime(xx,yy,zz,interpolationIn2D)
             %DoE = -sin(2*zz).*C22mC11Gr(xx,yy)+cos(2*zz).*C12Gr(xx,yy);
             DoE = 2*C12Gr(xx,yy).*cos(2*zz)+sin(2*zz).*C22mC11Gr(xx,yy);
             Bll(abs(DoE)<1e-2) = 0;
+             % Invariance condition
+            %ZeroSet = (cos(zz)).^2.*C11Gr(xx,yy)+sin(2*zz).*C12Gr(xx,yy)+(sin(zz)).^2.*C22Gr(xx,yy);
+            %ZeroSet = sqrt((- sin(zz).*qx_interp(xx,yy) + cos(zz).*qy_interp(xx,yy)).^2);
+            %ZeroSet = sin(zz).*qx_interp(xx,yy) - cos(zz).*qy_interp(xx,yy);
+            %Bll(ZeroSet<0.9*abs(lam))=0;
+            %Bll(ZeroSet>1.1*abs(lam))=0;
             
         % Evaluate r'(s)
         utemp = cos(zz);

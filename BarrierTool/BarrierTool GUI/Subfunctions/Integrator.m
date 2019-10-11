@@ -10,15 +10,20 @@
 % Output arguments:
 %   xt: x-component of Lagrangian trajectories - size: [#times,#particles]
 %   yt: y-component of Lagrangian trajectories - size: [#times,#particles]
-function [xt,yt] = Integrator(x0,y0,tspan,NCores,options,u_interp,v_interp)
+function [xt,yt] = Integrator(x0,y0,tspan,NCores,options,u_interp,v_interp,diffusion)
 Np = numel(x0);               % number of particles
 x0 = x0(:); y0 = y0(:);
 %% Computing the final positions of the Lagrangian particles:
 if NCores == 1
 
     [~,F] = ode45(@ODEfun,tspan,[x0;y0],options,u_interp,v_interp);
-    xt = F(end,1:end/2);
-    yt = F(end,end/2+1:end);
+    if diffusion
+        xt = F(:,1:end/2);
+        yt = F(:,end/2+1:end);
+    else
+        xt = F(end,1:end/2);
+        yt = F(end,end/2+1:end);
+    end
     
 else
     cpu_num = min(NCores,Np);
@@ -35,9 +40,14 @@ else
     spmd
         Range = id(labindex)+1:id(labindex+1);
         [~,F] = ode45(@ODEfun,tspan,[x0(Range);y0(Range)],options,u_interp,v_interp);
-            
-        xt = F(end,1:end/2);
-        yt = F(end,end/2+1:end);
+        
+        if diffusion
+            xt = F(:,1:end/2);
+            yt = F(:,end/2+1:end);
+        else
+            xt = F(end,1:end/2);
+            yt = F(end,end/2+1:end);
+        end
         
     end
     
@@ -53,4 +63,6 @@ function dy = ODEfun(t,y,u_interp,v_interp)
     dy = zeros(2*Np,1);
     dy(1:Np,1)      = u_interp( t*ones(Np,1),y(1:Np,1),y(Np+1:2*Np,1) );
     dy(Np+1:2*Np,1) = v_interp( t*ones(Np,1),y(1:Np,1),y(Np+1:2*Np,1) );
+    %dy(1:Np,1)      = u_interp( t*ones(Np,1),wrapTo2Pi(y(1:Np,1)),wrapTo2Pi(y(Np+1:2*Np,1)) );
+    %dy(Np+1:2*Np,1) = v_interp( t*ones(Np,1),wrapTo2Pi(y(1:Np,1)),wrapTo2Pi(y(Np+1:2*Np,1)) );
 end

@@ -51,18 +51,24 @@ function [x0lam,y0lam,phi0lam]=r0_lam(lamV,C11,C12,C22,x_g,y_g,b_h,eulerian)
         % Extract the x_0(\lambda,\phi_0) (cf. Fig. 2b or eq.(39) of [1])
         CC = contourc(x_g,y_g,ZeroSet,[0,0]);
         ss = getcontourlines(CC);
-        XXvTzero = [];
-        YYvTzero = [];
-        for kkk=1:size(ss,2)
-            XXvTzero = [XXvTzero;(ss(kkk).x)'];
-            YYvTzero = [YYvTzero;(ss(kkk).y)'];
+        if isempty(ss)
+            x0lam = [];
+            Spinner(gcf,'Done','Stop',[615,154,80,80]);
+            break
+        else
+            XXvTzero = [];
+            YYvTzero = [];
+            for kkk=1:size(ss,2)
+                XXvTzero = [XXvTzero;(ss(kkk).x)'];
+                YYvTzero = [YYvTzero;(ss(kkk).y)'];
+            end
+            
+            ZZvTzero = phi0+0*XXvTzero;
+            % Cell variables containing the x,y,\phi coordinates of \lambda-dependent zero level set
+            x0lam{kkmu} = XXvTzero;
+            y0lam{kkmu} = YYvTzero;
+            phi0lam{kkmu} = ZZvTzero;
         end
-
-        ZZvTzero = phi0+0*XXvTzero;
-        % Cell variables containing the x,y,\phi coordinates of \lambda-dependent zero level set 
-        x0lam{kkmu} = XXvTzero;
-        y0lam{kkmu} = YYvTzero;
-        phi0lam{kkmu} = ZZvTzero;
     
     end
     

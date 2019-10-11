@@ -19,9 +19,11 @@
 % http://www.zfm.ethz.ch/~serra/
 %--------------------------------------------------------------------------
 
-function [x1Psol,x2Psol]=FindClosedNullGeod(C22mC11Gr,C12Gr,phiPrGr,x0lam,y0lam,phi0lam,x1_g,x2_g,lamV,sVec,NCores,b_h,interpolationIn2D)   
+function [x1Psol,x2Psol]=FindClosedNullGeod(C22mC11Gr,C11Gr,C12Gr,C22Gr,phiPrGr,x0lam,y0lam,phi0lam,x1_g,x2_g,lamV,sVec,NCores,b_h,interpolationIn2D)   
 
-    % Initialize the variables containing the periodic solutions of the initial value problem 
+    % Initialize the variables containing the periodic solutions of the initial value problem
+    xxx = cell(length(lamV),1);
+    yyy = cell(length(lamV),1);
     x1Psol = cell(1,length(lamV));
     x2Psol = x1Psol;
     phiPsol = x1Psol;
@@ -71,7 +73,7 @@ tic
 
         spmd
             Range = id(labindex)+1:id(labindex+1);
-            [xxfTot,yyfTot,zzfTot] = Advect_r(phiPrGr,C22mC11Gr,C12Gr,x1_glim,x2_glim,sVec,x0(Range),y0(Range),phi0(Range),interpolationIn2D);
+            [xxfTot,yyfTot,zzfTot] = Advect_r(phiPrGr,C22mC11Gr,C12Gr,x1_glim,x2_glim,sVec,x0(Range),y0(Range),phi0(Range),interpolationIn2D,C11Gr,C22Gr,lam);
         end
 
         % Put the trajectories of ODE (38) in matrix form
@@ -88,10 +90,27 @@ tic
         end
         
         % Find periodic solutions 
-        [X1lco,X2lco] = PeriodicSolutions(X_Vf,Y_Vf,Z_Vf);
+        %[X1lco,X2lco] = PeriodicSolutions(X_Vf,Y_Vf,Z_Vf);
+        [X1lco,X2lco,philco] = PeriodicSolutions(X_Vf,Y_Vf,Z_Vf);
         toc
         clear X_Vf Y_Vf Z_Vf
-
+        
+        %{
+        for i = 1:size(X1lco,2)
+            xx = X1lco(:,i);
+            yy = X2lco(:,i);
+            zz = philco(:,1);
+            ZeroSet = (cos(zz)).^2.*C11Gr(xx,yy)+sin(2*zz).*C12Gr(xx,yy)+(sin(zz)).^2.*C22Gr(xx,yy);
+            xx(ZeroSet<0.95*abs(lam) | ZeroSet>1.05*abs(lam))=[]; yy(ZeroSet<0.95*abs(lam) | ZeroSet>1.05*abs(lam))=[];
+            %xx(ZeroSet>1.05*abs(lam))=[]; yy(ZeroSet>1.05*abs(lam))=[];
+            xxx{kklam,1} = xx;
+            yyy{kklam,1} = yy;
+        end
+        %}
+    
+        % Final curves in a cell 
+        %x1Psol{kklam} = xx;
+        %x2Psol{kklam} = yy;
         % Final curves in a cell 
         x1Psol{kklam} = X1lco;
         x2Psol{kklam} = X2lco;

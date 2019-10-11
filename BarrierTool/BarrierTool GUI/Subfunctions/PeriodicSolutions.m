@@ -17,7 +17,7 @@
 % Author: Mattia Serra  serram@ethz.ch
 % http://www.zfm.ethz.ch/~serra/
 %--------------------------------------------------------------------------
-function [X1lco,X2lco] = PeriodicSolutions(X_Vf,Y_Vf,Z_Vf)
+function [X1lco,X2lco,philco] = PeriodicSolutions(X_Vf,Y_Vf,Z_Vf)
 
 
 X1lco=[];X2lco=[];philco=[];
@@ -137,7 +137,7 @@ end
         indFFin=MatrixFinal(:,1);
         X1lco=X_Vf(:,indFFin);
         X2lco=Y_Vf(:,indFFin);
-        %philco=Z_Vf(:,indFFin);
+        philco=Z_Vf(:,indFFin);
 
         % Final closed null-geodesics
         for kk=1:size(X1lco,2)-1

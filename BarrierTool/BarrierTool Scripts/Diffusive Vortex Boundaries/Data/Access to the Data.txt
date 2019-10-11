@@ -1,0 +1,7 @@
+The two-dimensional turbulence dataset was produced by Mohammad Farazmand using a pseudo-spectral code to solve the two-dimensional, incompressible Navier-Stokes equations at Re = 50000.
+
+The data is publicly available in the following link:
+https://polybox.ethz.ch/index.php/s/L0b0piQEqhOqNjg
+
+Questions regarding the dataset should be addressed to:
+farazmand {at} ncsu {dot} edu

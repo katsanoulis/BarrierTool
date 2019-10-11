@@ -11,6 +11,7 @@ else
     disp(' ');    
 end
 nLCSs = size(handles.x1LcOutM,2);
+%nLCSs = size(handles.x1Psol,2);
 options = odeset('RelTol',1e-6,'AbsTol',1e-6);
 t0 = handles.itimeAd;
 t1 = handles.ftimeAd;
@@ -34,7 +35,17 @@ else
 end
 
 l = zeros(1,nLCSs+1);
-[~,Fgrid] = ode45(@ODEfun,tspan,[x0(:);y0(:)],options,u_interp,v_interp);
+xLCS = [];
+yLCS = [];
+for n = 1:nLCSs
+    l(n+1) = length(handles.x1LcOutM{1,n}(:));
+    xLCS = [xLCS; handles.x1LcOutM{1,n}(:)];
+    yLCS = [yLCS; handles.x2LcOutM{1,n}(:)];
+end
+[timeInt,Fcurve] = ode45(@ODEfun,tspan,[xLCS;yLCS],options);
+
+%[~,Fgrid] = ode45(@ODEfun,tspan,[x0(:);y0(:)],options,u_interp,v_interp);
+[~,Fgrid] = ode45(@ODEfun,tspan,[x0(:);y0(:)],options);
 l(1) = length(x0(:));
 
 Fgrid1 = Fgrid(:,1:l(1));
@@ -46,10 +57,12 @@ min2 = min(Fgrid2(:));
 
 F = cell(1,nLCSs);
 
-for n = 1:nLCSs
-    [timeInt,F{1,n}] = ode45(@ODEfun,tspan,[handles.x1LcOutM{1,n}(:);handles.x2LcOutM{1,n}(:)],options,u_interp,v_interp);
-    l(n+1) = length(handles.x1LcOutM{1,n}(:));
-end
+size(handles.x1Psol)
+
+%for n = 1:nLCSs
+    %[timeInt,F{1,n}] = ode45(@ODEfun,tspan,[handles.x1LcOutM{1,n}(:);handles.x2LcOutM{1,n}(:)],options,u_interp,v_interp);
+    %[timeInt,F{1,n}] = ode45(@ODEfun,tspan,[handles.x1LcOutM{1,n}(:);handles.x2LcOutM{1,n}(:)],options);
+
 toc
 
 if ~handles.eulerian
@@ -76,6 +89,7 @@ tic
 disp(' ');
 disp(['Creating GIF ...']);
 disp(' ');
+summa = numel(Fcurve(1,:))/2;
 for i=1:length(Fgrid(:,1))
     
     % Colormap encoding different \lambda values 
@@ -95,16 +109,31 @@ for i=1:length(Fgrid(:,1))
     scatter(Fgrid(i,1:l(1)),Fgrid(i,l(1)+1:end),sz,trC(:),'filled')
     end
     hold on
-    for n=1:nLCSs
-        plot(F{1,n}(i,1:l(n+1)),F{1,n}(i,l(n+1)+1:end),'color','r','LineWidth',3)
+    inP = 1;
+    for n=2:nLCSs+1
+        plot(Fcurve(i,inP:inP+l(n)-1),Fcurve(i,summa+inP:summa+inP+l(n)-1),'color','r','LineWidth',3)
+        inP = inP + l(n);
     end
     axis([min1 max1 min2 max2])
     set(gca,'FontSize',AxthicksFnt,'fontWeight','normal')
+    
+    %{
+    axis([0 2*pi 0 2*pi])
+    set(gca,'XTickLabel',[])
+    set(gca,'YTickLabel',[])
+    set(gca,'XTick',[])
+    set(gca,'YTick',[])
+    hAxes = gca;     %Axis handle
+    hAxes.XRuler.Axle.LineStyle = 'none';  
+    hAxes.YRuler.Axle.LineStyle = 'none';
+    %}
     hhF=colorbar(gca);
     box on
     set(gca,'YDir','normal')
+    %set(gca,'Color',[0.8 0.8 0.8])
     set(gcf,'color','w');
-    set(gcf, 'Position', [0, 0, 1000, 430])
+    set(gcf, 'Position', [0, 0, 1000, 1000])
+    
     xlabel('$$x$$','Interpreter','latex','FontWeight','bold','FontSize',fontsizeaxlab);
     ylabel('$$y$$','Interpreter','latex','FontWeight','bold','FontSize',fontsizeaxlab);
     set(gca, 'Ticklength', [0 0])
@@ -130,6 +159,7 @@ for i=1:length(Fgrid(:,1))
         set(get(hhF,'xlabel'),'string','$$tr \hphantom{[} [(\dot{T}_{t_0}^{t_0})^{-1}]$$','Interpreter','latex','FontWeight','normal');
     end
     end
+    
     hold off
     drawnow
     % Capture the plot as an image 
@@ -146,11 +176,66 @@ end
 toc
 
 
-function dy = ODEfun(t,y,u_interp,v_interp)   
+%function dy = ODEfun(t,y,u_interp,v_interp)
+function dy = ODEfun(t,y)  
+    %{
+    % load the grid over which the velocity is saved
+    xi = linspace(0,2*pi,1025);
+    yi = linspace(0,2*pi,1025);
+
+    N=round(length(y)/2);
+    y(1:N,1)     = wrapTo2Pi(y(1:N,1));
+    y(N+1:2*N,1) = wrapTo2Pi(y(N+1:2*N,1));
+    
+    % Interpolate velocity in time and space
+    [u1_vec, u2_vec]= interp_vel(t,y,xi,yi);
+    dy = zeros(2*N,1);    % a column vector
+    dy(1:N,1) = u1_vec(1:N,1);
+    dy(N+1:2*N,1) = u2_vec(1:N,1);
+    
+    function [u_vec, v_vec]=interp_vel(t,y,xi,yi)
+        N=round(length(y)/2);
+        % load velocity data
+        k=floor(t/0.2);
+        [ui, vi]=read_vel(k);
+        [uf, vf]=read_vel(k+1);
+        
+        %linear interpolation in time
+        u_t = ((k+1)*0.2-t)/0.2*ui + (t-k*0.2)/0.2*uf;
+        v_t = ((k+1)*0.2-t)/0.2*vi + (t-k*0.2)/0.2*vf;
+        
+        %spline interpolation in space
+        %u_vec=interp2(x,y, u_t, Y(1:N,1), Y(N+1:2*N,1),’*spline’);
+        %v_vec=interp2(x,y, v_t, Y(1:N,1), Y(N+1:2*N,1),’*spline’);
+        u_interp = griddedInterpolant({xi,yi},u_t,'spline','none');
+        v_interp = griddedInterpolant({xi,yi},v_t,'spline','none');
+        u_vec = u_interp(y(1:N,1),y(N+1:2*N,1));
+        v_vec = v_interp(y(1:N,1),y(N+1:2*N,1));
+    end
+        
+        function [v1, v2]=read_vel(k)
+            
+            str1 = 'turb_u_'; 
+            str2 = pad(int2str(k),4,'left','0');
+            str = strcat(str1,str2);
+            load(str);
+            [n1, n2]=size(u1);
+            v1=zeros(n1+1,n2+1); v2=zeros(n1+1,n2+1);
+            v1 = [u1 u1(:,1)]; v1=[v1; v1(1,:)]';
+            v2 = [u2 u2(:,1)]; v2=[v2; v2(1,:)]';
+        end
+        
+%}
+            
+    
+    
     Np = numel(y)/2;
     dy = zeros(2*Np,1);
     dy(1:Np,1)      = u_interp( t*ones(Np,1),y(1:Np,1),y(Np+1:2*Np,1) );
     dy(Np+1:2*Np,1) = v_interp( t*ones(Np,1),y(1:Np,1),y(Np+1:2*Np,1) );
+    %dy(1:Np,1)      = u_interp( t*ones(Np,1),wrapTo2Pi(y(1:Np,1)),wrapTo2Pi(y(Np+1:2*Np,1)) );
+    %dy(Np+1:2*Np,1) = v_interp( t*ones(Np,1),wrapTo2Pi(y(1:Np,1)),wrapTo2Pi(y(Np+1:2*Np,1)) );
+    %}
 end
 
 end
