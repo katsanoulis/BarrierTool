@@ -15,7 +15,7 @@ J. Fluid Mech. 731 (2013) R4.
 [2] G. Haller, D. Karrasch & F. Kogelbauer, Material barriers to diffusive and stochastic transport. Proc. Natl. Acad. Sci. U.S.A. (2018).
 
 [3] S. Katsanoulis, M. Farazmand, M. Serra & G. Haller, Diffusive vortex boundaries as material barriers to vorticity
-transport in two-dimensional flows. Submitted.
+transport in two-dimensional flows. Phys. Rev. Fluids 5 (2020) 024701.
 
 [4] M. Serra & G. Haller, Objective Eulerian coherent structures. Chaos26 (2016).
 
